@@ -52,4 +52,26 @@ plt.axis('equal')
 plt.grid(True)
 plt.legend()
 
+
+
+# 二、生成一条平行光线并对其追迹
+## 生成一条平行光并绘制
+ray = {
+    'x' : -20,
+    'y' : np.random.uniform(-9,9,1),
+    'dx' : 1,
+    'dy' : 0,
+}
+
+x0 = ray['x']
+y0 = ray['y']
+dx = ray['dx']
+dy = ray['dy']
+
+t = np.linspace(0,20,100)
+
+x = x0 + t * dx
+y = y0 + t * dy
+
+plt.plot(x,y,linestyle = "--")
 plt.show()
