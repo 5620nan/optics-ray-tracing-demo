@@ -4,15 +4,13 @@ from fontTools.ttLib.tables.V_D_M_X_ import table_V_D_M_X_
 
 # 一、画一个凸透镜
 
-# =========================
-# 定义一个透镜
-# =========================
 ## 1.定义一个透镜
 R1 = 50 # 前表面曲率半径
 R2 = -50 # 后表面曲率半径)
 t = 5 # 透镜中心厚度
 diameter = 20 # 透镜直径
-n = 1.5 # 透镜折射率
+n1 = 1.0 # 空气折射率
+n2 = 1.5 # 透镜折射率
 semi_diameter = diameter / 2 # 半口径
 y = np.linspace(-semi_diameter, semi_diameter, 400) # 在半口径范围内取400个y点
 
@@ -27,28 +25,24 @@ y_v1 = 0
 x_front = 0 + sag(y,R1) # 前表面曲线
 x_back = t - sag(y, R2)  #计算后表面曲线
 
-
-# =========================
-# 绘图
-# =========================
+## 4.绘制
 plt.figure(figsize=(10, 6)) # 定义一张画布
-
-## 1.画出前后表面
+### 1.画出前后表面
 plt.plot(x_front,y,label = "Front Surface")
 plt.plot(x_back,y,label = "Back Surface")
 
-## 2.填充内部
+### 2.填充内部
 plt.fill_betweenx(y,x_front,x_back,alpha = 0.5)
 
-## 3.画出光轴
+### 3.画出光轴
 plt.axhline(0,linestyle = "--",linewidth = 0.8)
 
-## 4.标出前后顶点
+### 4.标出前后顶点
 plt.scatter([t,0],[0,0],s = 40)
 plt.text(0,0.8,'V1')
 plt.text(t,0.8,'V2')
 
-## 5.图形设置
+### 5.图形设置
 plt.title("Biconvex Lens")
 plt.xlabel("x(mm)")
 plt.ylabel("y(mm)")
@@ -57,9 +51,8 @@ plt.grid(True)
 plt.legend()
 
 
-
 # 二、生成一条平行光线并对其追迹
-## 生成一条平行光并与凸透镜前表面相交
+## 1.生成一条平行光并与凸透镜前表面相交
 ray = {
     'x' : -20,
     'y' : np.random.uniform(-9,9,1),
@@ -77,8 +70,7 @@ t = np.linspace(0,20,100)
 x = x0 + t * dx #光线参数方程
 y = y0 + t * dy
 
-
-## 求平行光与前表面交点
+## 2.求平行光与前表面交点
 x_c1 = x_v1 + R1 #凸透镜前表面圆心坐标
 y_c1 = 0
 
@@ -100,8 +92,8 @@ else:
 x1 = x0 + t1 * dx # 根据求出的t，求出光线与凸透镜前表面交点横坐标
 x2 = x0 + t2 * dx
 
-distance_1 = abs(x_c1 - x1) # 选择与前表面顶点差值更小的点作为交点
-distance_2 = abs(x_c1 - x2)
+distance_1 = abs(x_v1 - x1) # 选择与前表面顶点差值更小的点作为交点
+distance_2 = abs(x_v1 - x2)
 if distance_1 < distance_2:
     x_hit = x1
 else:
@@ -109,6 +101,27 @@ else:
 
 y_hit = y0
 
+## 3.求入射向量和入射点法向量
+I = np.array([dx,dy]) # 入射光线方向向量
+
+nx = x_c1 - x_hit
+ny = y_c1 - y_hit
+
+length = np.sqrt(nx ** 2 + ny ** 2) # 求出向量模长
+
+nx = nx / length # 求出法向量的方向向量
+ny = ny / length
+
+N = np.array([nx,ny]) # 前表面顶点法向量方向向量
+
+## 4.根据斯涅尔定律求折射方向角/方向向量
+cos_theta1 = np.dot(I,N)
+sin_theta1 = np.sqrt(1 - cos_theta1 ** 2) # 求出入射角sin值
+
+sin_theta2 = n1 / n2 * sin_theta1 # 根据斯涅尔定律求出折射角
+theta2 = np.arcsin(sin_theta2)
+
+## 绘制
 plt.scatter([x_hit],[y_hit],s = 40)
 plt.plot(x,y,linestyle = "--")
 plt.show()
